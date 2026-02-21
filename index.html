@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoPulse CRM – HSR Motors</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Notification Toast -->
+<div id="toast-container"></div>
+
+<!-- App Shell -->
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <span class="logo-title">AutoPulse</span>
+        <span class="logo-sub">CRM</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">MAIN MENU</div>
+      <a href="#" class="nav-item" data-screen="lead-listing" onclick="navigate('lead-listing')">
+        <span class="nav-icon">📋</span>
+        <span>Lead Listing</span>
+        <span class="nav-badge">142</span>
+      </a>
+      <a href="#" class="nav-item" data-screen="lead-details" onclick="navigate('lead-details')">
+        <span class="nav-icon">👤</span>
+        <span>Lead Details</span>
+      </a>
+      <a href="#" class="nav-item" data-screen="lead-management" onclick="navigate('lead-management')">
+        <span class="nav-icon">🗂️</span>
+        <span>Lead Management</span>
+      </a>
+      <a href="#" class="nav-item" data-screen="dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="automation-panel">
+        <div class="auto-panel-title">🤖 Smart Automation</div>
+        <div class="auto-item active"><span class="auto-dot"></span>Auto-assign ON</div>
+        <div class="auto-item active"><span class="auto-dot"></span>Lead Scoring ON</div>
+        <div class="auto-item active"><span class="auto-dot warn"></span>3 Reminders Pending</div>
+        <div class="auto-item"><span class="auto-dot info"></span>Dup. Detection ON</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search leads, vehicles, contacts…" class="search-input" />
+        </div>
+        <div class="topbar-filters" id="topbar-filters">
+          <select class="filter-select">
+            <option>All Status</option>
+            <option>New</option>
+            <option>Contacted</option>
+            <option>Qualified</option>
+            <option>Converted</option>
+            <option>Not Interested</option>
+          </select>
+          <select class="filter-select">
+            <option>All Sources</option>
+            <option>Website</option>
+            <option>Facebook</option>
+            <option>Google</option>
+            <option>Twitter</option>
+            <option>Referral</option>
+            <option>Offline</option>
+          </select>
+          <select class="filter-select">
+            <option>This Month</option>
+            <option>Last Month</option>
+            <option>Custom Range</option>
+          </select>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="notification-bell" onclick="toggleNotifications()">
+          🔔
+          <span class="notif-badge">4</span>
+          <div class="notif-dropdown" id="notif-dropdown">
+            <div class="notif-header">Notifications</div>
+            <div class="notif-item urgent">⚠️ Follow-up overdue: Rahul Mehta (2 days)</div>
+            <div class="notif-item">📥 New lead auto-assigned: Sneha Kapoor</div>
+            <div class="notif-item warn">🔁 Duplicate detected: +91-9876543210</div>
+            <div class="notif-item">📊 Monthly summary ready for review</div>
+          </div>
+        </div>
+        <div class="role-switcher">
+          <span class="role-label">Viewing as:</span>
+          <select id="role-select" onchange="switchRole(this.value)" class="role-dropdown">
+            <option value="sales">Priya S. (Sales Executive)</option>
+            <option value="manager">Arjun K. (Business Manager)</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- SCREENS -->
+    <main class="content-area">
+
+      <!-- ========== SCREEN 1: LEAD LISTING ========== -->
+      <div class="screen active" id="screen-lead-listing">
+        <div class="screen-header">
+          <div>
+            <h1 class="screen-title">Lead Listing</h1>
+            <p class="screen-subtitle">Centralized view of all incoming leads across channels</p>
+          </div>
+          <div class="screen-actions">
+            <button class="btn btn-secondary" onclick="showToast('Sorted by Hot Leads 🔥')">🔥 Hot Leads</button>
+            <button class="btn btn-primary" onclick="openAddLeadModal()">+ Add Lead</button>
+          </div>
+        </div>
+
+        <!-- Status Summary Cards -->
+        <div class="status-cards">
+          <div class="stat-card new">
+            <div class="stat-number">32</div>
+            <div class="stat-label">New</div>
+            <div class="stat-icon">🆕</div>
+          </div>
+          <div class="stat-card contacted">
+            <div class="stat-number">42</div>
+            <div class="stat-label">Contacted</div>
+            <div class="stat-icon">📞</div>
+          </div>
+          <div class="stat-card qualified">
+            <div class="stat-number">19</div>
+            <div class="stat-label">Qualified</div>
+            <div class="stat-icon">✅</div>
+          </div>
+          <div class="stat-card converted">
+            <div class="stat-number">20</div>
+            <div class="stat-label">Converted</div>
+            <div class="stat-icon">🏆</div>
+          </div>
+          <div class="stat-card not-interested">
+            <div class="stat-number">29</div>
+            <div class="stat-label">Not Interested</div>
+            <div class="stat-icon">❌</div>
+          </div>
+        </div>
+
+        <!-- Automation Alert Bar -->
+        <div class="auto-alert-bar">
+          <span class="auto-badge auto">🤖 Auto-Assigned</span>
+          <span>3 leads were auto-assigned based on lowest workload.</span>
+          <span class="auto-badge dup">🔁 Duplicate Detected</span>
+          <span>1 potential duplicate found. <a href="#" onclick="showToast('Duplicate review opened')">Review</a></span>
+        </div>
+
+        <!-- Lead Table -->
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div class="table-tool-left">
+              <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" />
+              <label for="select-all" style="margin-left:6px;font-size:13px;">Select All</label>
+              <span class="bulk-actions" id="bulk-actions" style="display:none;">
+                <button class="btn btn-sm btn-secondary" onclick="showToast('Bulk status update')">Change Status</button>
+                <button class="btn btn-sm btn-danger" onclick="showToast('Leads deleted')">Delete</button>
+              </span>
+            </div>
+            <div class="table-tool-right">
+              <span class="table-count" id="lead-count">Showing 8 of 142 leads</span>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="select-all-th" onchange="toggleSelectAll(this)" /></th>
+                  <th>Lead Name</th>
+                  <th>Phone</th>
+                  <th>Source</th>
+                  <th>Vehicle Interested</th>
+                  <th>Status</th>
+                  <th>Assigned To</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leads-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SCREEN 2: LEAD DETAILS ========== -->
+      <div class="screen" id="screen-lead-details">
+        <div class="screen-header">
+          <div>
+            <div class="breadcrumb">
+              <a href="#" onclick="navigate('lead-listing')">Lead Listing</a> / Lead Details
+            </div>
+            <h1 class="screen-title">Lead Details</h1>
+          </div>
+          <div class="screen-actions">
+            <span class="score-badge hot">🔥 Hot Lead</span>
+            <button class="btn btn-success" onclick="showToast('Converting lead to Sale! 🎉')">💰 Convert to Sale</button>
+          </div>
+        </div>
+
+        <!-- Overdue Alert -->
+        <div class="overdue-alert">
+          ⚠️ <strong>Overdue Follow-up!</strong> Last activity was 3 days ago. Immediate action required.
+        </div>
+
+        <div class="details-grid">
+          <!-- LEFT: Customer Info -->
+          <div class="details-left">
+            <div class="info-card">
+              <div class="info-card-header">
+                <div class="lead-avatar">RM</div>
+                <div>
+                  <div class="lead-fullname">Rahul Mehta</div>
+                  <div class="lead-meta-tag">ID: #LD-2024-0892</div>
+                </div>
+              </div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-label">📞 Phone</div>
+                  <div class="info-value">+91 98765 43210</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">📧 Email</div>
+                  <div class="info-value">rahul.mehta@gmail.com</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">💰 Budget</div>
+                  <div class="info-value">₹12,00,000 – ₹15,00,000</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">🚗 Vehicle</div>
+                  <div class="info-value">Hyundai Creta - SX(O)</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">📡 Source</div>
+                  <div class="info-value"><span class="source-badge facebook">Facebook</span></div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">👤 Assigned To</div>
+                  <div class="info-value">Priya Sharma</div>
+                </div>
+                <div class="info-item full">
+                  <div class="info-label">📅 Lead Since</div>
+                  <div class="info-value">Feb 18, 2026</div>
+                </div>
+              </div>
+
+              <div class="lead-score-section">
+                <div class="score-title">Lead Score</div>
+                <div class="score-bar-wrap">
+                  <div class="score-bar hot-bar" style="width:82%"></div>
+                </div>
+                <div class="score-labels"><span>Cold</span><span>Warm</span><span>Hot (82)</span></div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-card">
+              <h3>Quick Actions</h3>
+              <button class="btn btn-full btn-call" onclick="showToast('📞 Dialing +91 98765 43210…')">📞 Quick Call</button>
+              <div class="form-row">
+                <select class="form-control">
+                  <option>Change Status…</option>
+                  <option>New</option>
+                  <option>Contacted</option>
+                  <option>Qualified</option>
+                  <option>Negotiation</option>
+                  <option>Closed Won</option>
+                  <option>Closed Lost</option>
+                </select>
+                <button class="btn btn-secondary" onclick="showToast('Status updated ✅')">Update</button>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Schedule Follow-up</label>
+                <input type="datetime-local" class="form-control" />
+                <button class="btn btn-primary mt-1" onclick="showToast('Follow-up scheduled 📅')">Schedule</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Activity Timeline -->
+          <div class="details-right">
+            <div class="timeline-card">
+              <div class="timeline-header">
+                <h3>Activity Timeline</h3>
+                <span class="timeline-count">8 activities</span>
+              </div>
+              <div class="timeline">
+                <div class="timeline-item call">
+                  <div class="tl-icon">📞</div>
+                  <div class="tl-body">
+                    <div class="tl-title">Call Logged</div>
+                    <div class="tl-detail">Duration: 4 min 32 sec. Discussed Creta SX(O) trim options and delivery timeline.</div>
+                    <div class="tl-meta">Priya Sharma · Feb 21, 2026 at 10:22 AM</div>
+                  </div>
+                </div>
+                <div class="timeline-item note">
+                  <div class="tl-icon">📝</div>
+                  <div class="tl-body">
+                    <div class="tl-title">Note Added</div>
+                    <div class="tl-detail">Customer prefers Titan Grey color. Needs financing options. Very interested.</div>
+                    <div class="tl-meta">Priya Sharma · Feb 20, 2026 at 3:45 PM</div>
+                  </div>
+                </div>
+                <div class="timeline-item status">
+                  <div class="tl-icon">🔄</div>
+                  <div class="tl-body">
+                    <div class="tl-title">Status Changed</div>
+                    <div class="tl-detail"><span class="badge badge-contacted">Contacted</span> → <span class="badge badge-qualified">Qualified</span></div>
+                    <div class="tl-meta">System · Feb 19, 2026 at 9:10 AM</div>
+                  </div>
+                </div>
+                <div class="timeline-item followup">
+                  <div class="tl-icon">📅</div>
+                  <div class="tl-body">
+                    <div class="tl-title">Follow-up Completed</div>
+                    <div class="tl-detail">Sent brochure and EMI calculator via WhatsApp.</div>
+                    <div class="tl-meta">Priya Sharma · Feb 19, 2026 at 11:00 AM</div>
+                  </div>
+                </div>
+                <div class="timeline-item call">
+                  <div class="tl-icon">📞</div>
+                  <div class="tl-body">
+                    <div class="tl-title">Call Logged</div>
+                    <div class="tl-detail">Initial contact, understood requirements. Interested in SUV under ₹15L.</div>
+                    <div class="tl-meta">Priya Sharma · Feb 18, 2026 at 2:15 PM</div>
+                  </div>
+                </div>
+                <div class="timeline-item system">
+                  <div class="tl-icon">🤖</div>
+                  <div class="tl-body">
+                    <div class="tl-title">Auto-Assigned <span class="auto-badge auto">🤖 Auto</span></div>
+                    <div class="tl-detail">Lead auto-assigned to Priya Sharma (lowest workload).</div>
+                    <div class="tl-meta">System · Feb 18, 2026 at 10:30 AM</div>
+                  </div>
+                </div>
+                <div class="timeline-item system">
+                  <div class="tl-icon">📥</div>
+                  <div class="tl-body">
+                    <div class="tl-title">Lead Created</div>
+                    <div class="tl-detail">New lead submitted via Facebook Lead Ads campaign.</div>
+                    <div class="tl-meta">System · Feb 18, 2026 at 10:28 AM</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add Note -->
+              <div class="add-note-section">
+                <h4>Add Note / Log Activity</h4>
+                <div class="note-type-tabs">
+                  <button class="note-tab active" onclick="setNoteTab(this)">📝 Note</button>
+                  <button class="note-tab" onclick="setNoteTab(this)">📞 Call Log</button>
+                  <button class="note-tab" onclick="setNoteTab(this)">📅 Follow-up</button>
+                </div>
+                <textarea class="note-textarea" placeholder="Add a note about this lead…"></textarea>
+                <div class="note-actions">
+                  <select class="form-control-sm">
+                    <option>Note type…</option>
+                    <option>General Note</option>
+                    <option>Call Summary</option>
+                    <option>Meeting Notes</option>
+                  </select>
+                  <button class="btn btn-primary" onclick="showToast('Note added to timeline ✅')">Save Activity</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SCREEN 3: LEAD MANAGEMENT (KANBAN) ========== -->
+      <div class="screen" id="screen-lead-management">
+        <div class="screen-header">
+          <div>
+            <h1 class="screen-title">Lead Management</h1>
+            <p class="screen-subtitle">Visual pipeline – drag & drop leads across stages</p>
+          </div>
+          <div class="screen-actions">
+            <button class="btn btn-secondary" onclick="showToast('Filters applied')">🔽 Filter Team</button>
+            <button class="btn btn-primary" onclick="openAddLeadModal()">+ Add Lead</button>
+          </div>
+        </div>
+
+        <div class="kanban-board" id="kanban-board">
+          <!-- Columns filled by JS -->
+        </div>
+      </div>
+
+      <!-- ========== SCREEN 4: DASHBOARD ========== -->
+      <div class="screen" id="screen-dashboard">
+        <!-- Sales Executive Dashboard -->
+        <div id="dashboard-sales">
+          <div class="screen-header">
+            <div>
+              <h1 class="screen-title">My Dashboard</h1>
+              <p class="screen-subtitle">Sales Executive – Priya S. · Feb 2026</p>
+            </div>
+          </div>
+
+          <div class="kpi-grid kpi-4">
+            <div class="kpi-card">
+              <div class="kpi-label">My Assigned Leads</div>
+              <div class="kpi-value">28</div>
+              <div class="kpi-delta up">↑ 4 this week</div>
+              <div class="kpi-icon">👤</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">My Conversion Rate</div>
+              <div class="kpi-value">32%</div>
+              <div class="kpi-delta up">↑ 5% vs last month</div>
+              <div class="kpi-icon">📈</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Pending Follow-ups</div>
+              <div class="kpi-value">7</div>
+              <div class="kpi-delta warn">⚠️ 2 overdue</div>
+              <div class="kpi-icon">📅</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Converted This Month</div>
+              <div class="kpi-value">9</div>
+              <div class="kpi-delta up">↑ 2 vs last month</div>
+              <div class="kpi-icon">🏆</div>
+            </div>
+          </div>
+
+          <!-- Alert Section -->
+          <div class="alert-section">
+            <div class="alert-card overdue-card">
+              <div class="alert-title">⚠️ Overdue Follow-ups</div>
+              <div class="alert-item">Rahul Mehta — <span class="ago">3 days overdue</span> · Creta SX(O)</div>
+              <div class="alert-item">Anjali Singh — <span class="ago">5 days overdue</span> · Venue S+</div>
+            </div>
+            <div class="alert-card inactive-card">
+              <div class="alert-title">💤 Inactive Leads</div>
+              <div class="alert-item">Karan Verma — No activity for <span class="ago">4 days</span></div>
+              <div class="alert-item">Meera Nair — No activity for <span class="ago">3 days</span></div>
+            </div>
+          </div>
+
+          <div class="charts-grid charts-3">
+            <div class="chart-card">
+              <div class="chart-title">Lead Status Distribution</div>
+              <canvas id="salesPieChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">My Leads by Source</div>
+              <canvas id="salesBarChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Weekly Follow-up Activity</div>
+              <canvas id="salesLineChart" height="220"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manager Dashboard -->
+        <div id="dashboard-manager" style="display:none;">
+          <div class="screen-header">
+            <div>
+              <h1 class="screen-title">Performance Dashboard</h1>
+              <p class="screen-subtitle">Business Manager – Arjun K. · HSR Motors Team</p>
+            </div>
+            <div class="screen-actions">
+              <select class="filter-select" onchange="showToast('Date filter applied')">
+                <option>This Month</option>
+                <option>Last Month</option>
+                <option>Custom Range</option>
+              </select>
+              <button class="btn btn-secondary" onclick="showToast('📄 Report exported to PDF!')">📤 Export Report</button>
+            </div>
+          </div>
+
+          <!-- Manager Monthly Summary Auto Badge -->
+          <div class="auto-alert-bar">
+            <span class="auto-badge auto">📊 Auto-Generated</span>
+            Monthly performance summary ready for Feb 2026. <a href="#" onclick="showToast('Opening summary report…')">View Report</a>
+          </div>
+
+          <div class="kpi-grid kpi-5">
+            <div class="kpi-card">
+              <div class="kpi-label">Total Leads (Month)</div>
+              <div class="kpi-value">142</div>
+              <div class="kpi-delta up">↑ 18 vs last month</div>
+              <div class="kpi-icon">📥</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Overall Conversion Rate</div>
+              <div class="kpi-value">28.2%</div>
+              <div class="kpi-delta up">↑ 3.1% MoM</div>
+              <div class="kpi-icon">🎯</div>
+            </div>
+            <div class="kpi-card highlight">
+              <div class="kpi-label">Total Revenue Generated</div>
+              <div class="kpi-value">₹84.6L</div>
+              <div class="kpi-delta up">↑ ₹12L vs last month</div>
+              <div class="kpi-icon">💰</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Avg Response Time</div>
+              <div class="kpi-value">1h 24m</div>
+              <div class="kpi-delta up">↓ 18min faster</div>
+              <div class="kpi-icon">⚡</div>
+            </div>
+            <div class="kpi-card gold">
+              <div class="kpi-label">Top Performer</div>
+              <div class="kpi-value" style="font-size:1.1rem;">Priya S.</div>
+              <div class="kpi-delta">9 conversions · 32%</div>
+              <div class="kpi-icon">🥇</div>
+            </div>
+          </div>
+
+          <div class="charts-grid charts-2">
+            <div class="chart-card">
+              <div class="chart-title">Leads by Source</div>
+              <canvas id="mgrBarChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Monthly Lead Trend</div>
+              <canvas id="mgrLineChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Status Distribution</div>
+              <canvas id="mgrPieChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Sales Executive Performance</div>
+              <canvas id="mgrHorizBarChart" height="220"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Add Lead Modal -->
+<div class="modal-overlay" id="add-lead-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add New Lead</h2>
+      <button class="modal-close" onclick="closeAddLeadModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="dup-warning" id="dup-warning" style="display:none;">
+        🔁 <strong>Duplicate Detected!</strong> A lead with this phone number already exists.
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" class="form-control" placeholder="e.g. Arjun Patel" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone *</label>
+          <input type="tel" class="form-control" placeholder="+91 XXXXX XXXXX" oninput="checkDuplicate(this)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" placeholder="email@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Source</label>
+          <select class="form-control">
+            <option>Website</option>
+            <option>Facebook</option>
+            <option>Google</option>
+            <option>Twitter</option>
+            <option>Referral</option>
+            <option>Offline</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vehicle Interested</label>
+          <input type="text" class="form-control" placeholder="e.g. Hyundai Creta SX" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Budget Range</label>
+          <input type="text" class="form-control" placeholder="e.g. ₹10L – ₹15L" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign To <span class="auto-badge auto">🤖 Auto</span></label>
+          <select class="form-control">
+            <option>Auto-assign (Lowest Workload)</option>
+            <option>Priya Sharma (12 leads)</option>
+            <option>Rohan Das (15 leads)</option>
+            <option>Sneha Kapoor (9 leads)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Status</label>
+          <select class="form-control">
+            <option>New</option>
+            <option>Contacted</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeAddLeadModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitLead()">Add Lead</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

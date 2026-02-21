@@ -1,0 +1,10 @@
+{
+    "name": "autopulse-crm",
+    "version": "1.0.0",
+    "description": "AutoPulse CRM – HSR Motors (Full-Stack)",
+    "scripts": {
+        "backend": "cd backend && npm run dev",
+        "frontend": "cd frontend && npm run dev",
+        "dev": "start cmd /k \"cd backend && npm run dev\" && start cmd /k \"cd frontend && npm run dev\""
+    }
+}

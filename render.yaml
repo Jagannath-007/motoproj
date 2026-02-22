@@ -3,12 +3,13 @@ services:
     name: autopulse-crm
     runtime: node
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && cd ../frontend && npm install && npm run build
     startCommand: node src/server.js
+    plan: free
     envVars:
       - key: NODE_ENV
         value: production
-      # Set this to your Wasmer app URL after deploying the frontend
-      # e.g. https://autopulse-crm.wasmer.app
-      - key: FRONTEND_URL
-        value: https://autopulse-crm.wasmer.app
+      - key: PORT
+        value: 10000
+      - key: DB_PATH
+        value: ./data/autopulse.db

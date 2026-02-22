@@ -1,5 +1,8 @@
 FROM node:22-alpine
 
+# Install Python and build tools (required for better-sqlite3)
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 # Copy backend package files
@@ -20,7 +23,7 @@ COPY frontend ./frontend
 WORKDIR /app/frontend
 RUN npm install && npm run build
 
-# Back to backend
+# Go back to backend
 WORKDIR /app/backend
 
 # Expose port

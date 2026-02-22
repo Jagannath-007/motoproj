@@ -21,10 +21,13 @@ app.use('/api/dashboard', dashboardRouter);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', app: 'AutoPulse CRM', time: new Date().toISOString() }));
 
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// Correct absolute path inside Docker
+const frontendPath = path.join(__dirname, "../../frontend/dist");
+
+app.use(express.static(frontendPath));
 
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+    res.sendFile(path.join(frontendPath, "index.html"));
 });
 
 app.use((err, req, res, next) => {

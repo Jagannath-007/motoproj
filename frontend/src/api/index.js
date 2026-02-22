@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+// In production (Wasmer), VITE_API_URL must be set to your backend URL (e.g. https://autopulse-crm.onrender.com)
+// In local dev, it falls back to /api which is proxied by Vite
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api' });
 
 // ── Leads ──
 export const getLeads = (params) => api.get('/leads', { params });

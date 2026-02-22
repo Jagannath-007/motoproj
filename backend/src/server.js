@@ -21,10 +21,10 @@ app.use('/api/dashboard', dashboardRouter);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', app: 'AutoPulse CRM', time: new Date().toISOString() }));
 
-const frontendDist = path.join(__dirname, "../frontend/dist");
-app.use(express.static(frontendDist));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
 app.get("*", (req, res) => {
-    res.sendFile(path.join(frontendDist, "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 app.use((err, req, res, next) => {

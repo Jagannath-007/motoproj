@@ -1,33 +1,31 @@
-# Use Node
 FROM node:22-alpine
 
-# Set working directory
 WORKDIR /app
 
 # Copy backend package files
-COPY package.json package-lock.json ./
+COPY backend/package.json backend/package-lock.json ./
 
 # Install backend dependencies
 RUN npm ci --omit=dev
 
 # Copy backend source
-COPY src/ ./src/
+COPY backend/src ./src
 
-# Copy frontend
-COPY ../frontend ./frontend
+# Copy frontend folder
+COPY frontend ./frontend
 
-# Install frontend dependencies and build
+# Build frontend
 WORKDIR /app/frontend
 RUN npm install && npm run build
 
-# Go back to backend folder
+# Go back to backend
 WORKDIR /app
 
 # Create data folder
 RUN mkdir -p /data
 
-# Expose port
+# Expose Render port
 EXPOSE 10000
 
-# Start backend
+# Start server
 CMD ["node", "src/server.js"]

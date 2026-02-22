@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// ── GET /api/dashboard/sales?userId=u1 ──
 router.get('/sales', (req, res) => {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ error: 'userId required' });
@@ -14,21 +13,18 @@ router.get('/sales', (req, res) => {
     const overdue = db.prepare(`SELECT l.*, u.name as assigned_name FROM leads l LEFT JOIN users u ON u.id = l.assigned_to WHERE l.assigned_to = ? AND l.follow_up_date < date('now') AND l.status NOT IN ('Converted','Not Interested','Closed Won','Closed Lost')`).all(userId);
     const inactive = db.prepare(`SELECT l.*, u.name as assigned_name FROM leads l LEFT JOIN users u ON u.id = l.assigned_to WHERE l.assigned_to = ? AND julianday('now') - julianday(l.last_activity_date) >= 3 AND l.status NOT IN ('Converted','Not Interested','Closed Won','Closed Lost')`).all(userId);
 
-    // Status distribution
     const statuses = ['New', 'Contacted', 'Qualified', 'Negotiation', 'Converted', 'Not Interested'];
     const statusDist = {};
     statuses.forEach(s => {
         statusDist[s] = db.prepare('SELECT COUNT(*) as c FROM leads WHERE assigned_to = ? AND status = ?').get(userId, s).c;
     });
 
-    // Source distribution
     const sources = ['Website', 'Facebook', 'Google', 'Twitter', 'Referral', 'Offline'];
     const sourceDist = {};
     sources.forEach(s => {
         sourceDist[s] = db.prepare('SELECT COUNT(*) as c FROM leads WHERE assigned_to = ? AND source = ?').get(userId, s).c;
     });
 
-    // Weekly follow-up activity (last 7 days)
     const weeklyActivity = [];
     for (let i = 6; i >= 0; i--) {
         const count = db.prepare(
@@ -52,23 +48,19 @@ router.get('/sales', (req, res) => {
     });
 });
 
-// ── GET /api/dashboard/manager ──
 router.get('/manager', (req, res) => {
     const totalLeads = db.prepare(`SELECT COUNT(*) as c FROM leads WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m','now')`).get().c;
     const totalConv = db.prepare(`SELECT COUNT(*) as c FROM leads WHERE status = 'Converted'`).get().c;
     const allLeads = db.prepare('SELECT COUNT(*) as c FROM leads').get().c;
 
-    // Revenue estimate: avg ₹12L per conversion
     const revenue = totalConv * 1200000;
 
-    // Source distribution
     const sources = ['Website', 'Facebook', 'Google', 'Twitter', 'Referral', 'Offline'];
     const sourceDist = {};
     sources.forEach(s => {
         sourceDist[s] = db.prepare('SELECT COUNT(*) as c FROM leads WHERE source = ?').get(s).c;
     });
 
-    // Monthly trend (last 6 months)
     const months = [];
     const monthlyLeads = [];
     const monthlyConversions = [];
@@ -81,14 +73,12 @@ router.get('/manager', (req, res) => {
         monthlyConversions.push(db.prepare(`SELECT COUNT(*) as c FROM leads WHERE status = 'Converted' AND strftime('%Y-%m', updated_at) = ?`).get(m).c);
     }
 
-    // Status distribution
     const statuses = ['New', 'Contacted', 'Qualified', 'Negotiation', 'Converted', 'Not Interested'];
     const statusDist = {};
     statuses.forEach(s => {
         statusDist[s] = db.prepare('SELECT COUNT(*) as c FROM leads WHERE status = ?').get(s).c;
     });
 
-    // Sales executive performance
     const salesUsers = db.prepare(`SELECT u.id, u.name FROM users u WHERE u.role = 'sales'`).all();
     const execPerformance = salesUsers.map(u => ({
         name: u.name,
@@ -96,7 +86,6 @@ router.get('/manager', (req, res) => {
         converted: db.prepare(`SELECT COUNT(*) as c FROM leads WHERE assigned_to = ? AND status = 'Converted'`).get(u.id).c,
     }));
 
-    // Top performer
     const top = [...execPerformance].sort((a, b) => b.converted - a.converted)[0];
 
     res.json({

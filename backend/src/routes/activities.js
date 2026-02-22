@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
-// GET /api/leads/:id/activities
 router.get('/:id/activities', (req, res) => {
     const activities = db.prepare(
         'SELECT * FROM activities WHERE lead_id = ? ORDER BY created_at DESC'
@@ -11,7 +10,6 @@ router.get('/:id/activities', (req, res) => {
     res.json(activities);
 });
 
-// POST /api/leads/:id/activities
 router.post('/:id/activities', (req, res) => {
     const { type, description, performed_by } = req.body;
     if (!type || !description) return res.status(400).json({ error: 'type and description required' });
@@ -20,7 +18,6 @@ router.post('/:id/activities', (req, res) => {
     db.prepare('INSERT INTO activities (id,lead_id,type,description,performed_by) VALUES (?,?,?,?,?)')
         .run(id, req.params.id, type, description, performed_by || 'User');
 
-    // Update lead's last_activity_date
     db.prepare(`UPDATE leads SET last_activity_date = date('now'), updated_at = datetime('now') WHERE id = ?`)
         .run(req.params.id);
 

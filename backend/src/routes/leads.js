@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
-// ── Helper: compute lead score ──
 function computeScore(lead) {
     const daysSinceActivity = lead.last_activity_date
         ? Math.floor((Date.now() - new Date(lead.last_activity_date)) / 86400000)
@@ -13,7 +12,6 @@ function computeScore(lead) {
     return 'cold';
 }
 
-// ── Helper: auto-assign ──
 function autoAssignUser() {
     const users = db.prepare(
         `SELECT u.id, COUNT(l.id) as load FROM users u
@@ -23,8 +21,6 @@ function autoAssignUser() {
     return users?.id || null;
 }
 
-// ── GET /api/leads ──
-// Query: ?assignedTo=u1&status=New&source=Google&search=rahul&sort=hot
 router.get('/', (req, res) => {
     const { assignedTo, status, source, search, sort } = req.query;
 
@@ -53,7 +49,6 @@ router.get('/', (req, res) => {
 
     const leads = db.prepare(query).all(...params);
 
-    // Enrich with aging (days since last activity)
     const enriched = leads.map(l => ({
         ...l,
         score: computeScore(l),
@@ -68,7 +63,6 @@ router.get('/', (req, res) => {
     res.json(enriched);
 });
 
-// ── GET /api/leads/summary ──
 router.get('/summary', (req, res) => {
     const statuses = ['New', 'Contacted', 'Qualified', 'Converted', 'Not Interested'];
     const summary = {};
@@ -78,7 +72,6 @@ router.get('/summary', (req, res) => {
     res.json(summary);
 });
 
-// ── GET /api/leads/:id ──
 router.get('/:id', (req, res) => {
     const lead = db.prepare(`
     SELECT l.*, u.name as assigned_name
@@ -89,12 +82,10 @@ router.get('/:id', (req, res) => {
     res.json({ ...lead, score: computeScore(lead) });
 });
 
-// ── POST /api/leads ──
 router.post('/', (req, res) => {
     const { name, phone, email, source, vehicle_interested, budget, status, assigned_to, follow_up_date } = req.body;
     if (!name || !phone || !source) return res.status(400).json({ error: 'name, phone, source required' });
 
-    // Duplicate detection
     const dup = db.prepare('SELECT id, name FROM leads WHERE phone = ?').get(phone);
     if (dup) return res.status(409).json({ error: 'Duplicate lead detected', existing: dup });
 
@@ -108,7 +99,6 @@ router.post('/', (req, res) => {
   `).run(id, name, phone, email || null, source, vehicle_interested || null, budget || null,
         status || 'New', assignee, follow_up_date || null, today);
 
-    // Log auto-assign activity
     db.prepare('INSERT INTO activities (id,lead_id,type,description,performed_by) VALUES (?,?,?,?,?)')
         .run(uuidv4(), id, 'system', `Lead auto-assigned (lowest workload).`, 'System');
 
@@ -116,7 +106,6 @@ router.post('/', (req, res) => {
     res.status(201).json({ ...lead, autoAssigned: !assigned_to });
 });
 
-// ── PUT /api/leads/:id ──
 router.put('/:id', (req, res) => {
     const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(req.params.id);
     if (!lead) return res.status(404).json({ error: 'Lead not found' });
@@ -135,11 +124,9 @@ router.put('/:id', (req, res) => {
 
     db.prepare(`UPDATE leads SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 
-    // If status changed, log activity
     if (req.body.status && req.body.status !== lead.status) {
         db.prepare('INSERT INTO activities (id,lead_id,type,description,performed_by) VALUES (?,?,?,?,?)')
             .run(uuidv4(), req.params.id, 'status', `Status changed: ${lead.status} → ${req.body.status}`, req.body.updated_by || 'User');
-        // Update last activity
         db.prepare(`UPDATE leads SET last_activity_date = date('now') WHERE id = ?`).run(req.params.id);
     }
 
@@ -147,7 +134,6 @@ router.put('/:id', (req, res) => {
     res.json(updated);
 });
 
-// ── DELETE /api/leads/:id ──
 router.delete('/:id', (req, res) => {
     const lead = db.prepare('SELECT id FROM leads WHERE id = ?').get(req.params.id);
     if (!lead) return res.status(404).json({ error: 'Lead not found' });
@@ -155,7 +141,6 @@ router.delete('/:id', (req, res) => {
     res.json({ success: true });
 });
 
-// ── POST /api/leads/:id/convert ──
 router.post('/:id/convert', (req, res) => {
     db.prepare(`UPDATE leads SET status = 'Converted', updated_at = datetime('now') WHERE id = ?`).run(req.params.id);
     db.prepare('INSERT INTO activities (id,lead_id,type,description,performed_by) VALUES (?,?,?,?,?)')
@@ -163,7 +148,6 @@ router.post('/:id/convert', (req, res) => {
     res.json({ success: true });
 });
 
-// ── POST /api/leads/check-duplicate ──
 router.post('/check-duplicate', (req, res) => {
     const { phone } = req.body;
     const dup = db.prepare('SELECT id, name, phone FROM leads WHERE phone = ?').get(phone);

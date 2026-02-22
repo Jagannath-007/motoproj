@@ -1,5 +1,5 @@
 app = "autopulse-crm-backend"
-primary_region = "sin"  # Singapore — closest to India
+primary_region = "sin"
 
 [build]
   dockerfile = "Dockerfile"

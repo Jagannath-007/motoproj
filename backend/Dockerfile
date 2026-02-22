@@ -1,20 +1,33 @@
-FROM node:20-slim
+# Use Node
+FROM node:22-alpine
 
-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
-
+# Set working directory
 WORKDIR /app
 
+# Copy backend package files
 COPY package.json package-lock.json ./
+
+# Install backend dependencies
 RUN npm ci --omit=dev
 
+# Copy backend source
 COPY src/ ./src/
 
+# Copy frontend
+COPY ../frontend ./frontend
+
+# Install frontend dependencies and build
+WORKDIR /app/frontend
+RUN npm install && npm run build
+
+# Go back to backend folder
+WORKDIR /app
+
+# Create data folder
 RUN mkdir -p /data
 
-EXPOSE 8080
+# Expose port
+EXPOSE 10000
 
-ENV PORT=8080
-ENV NODE_ENV=production
-ENV DB_PATH=/data/autopulse.db
-
+# Start backend
 CMD ["node", "src/server.js"]
